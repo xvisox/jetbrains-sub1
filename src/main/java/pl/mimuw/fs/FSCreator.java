@@ -9,6 +9,7 @@ public class FSCreator {
     @SneakyThrows
     public static void create(final FSEntry entryToCreate, final String destination) {
         try {
+            entryToCreate.validateEntrySize();
             entryToCreate.createEntryInFS(destination);
         } catch (Exception e) {
             // It wasn't specified what to do in case of failure,

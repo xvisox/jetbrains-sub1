@@ -1,6 +1,7 @@
 package pl.mimuw.fs;
 
 import lombok.extern.slf4j.Slf4j;
+import pl.mimuw.fs.exceptions.FSEntrySizeException;
 import pl.mimuw.fs.exceptions.FSEntryNotCreatedException;
 
 import java.nio.file.Files;
@@ -33,6 +34,19 @@ public class FSFolder extends FSEntry {
         createDirectory(pathToDirectory);
         for (FSEntry entry : content) {
             entry.createEntryInFS(pathToDirectory);
+        }
+    }
+
+    @Override
+    public void validateEntrySize() throws FSEntrySizeException {
+        if (name.length() > FSConstants.FOLDER_NAME_MAX_LENGTH) {
+            throw new FSEntrySizeException("Directory name exceeds max size: " + FSConstants.FOLDER_NAME_MAX_LENGTH);
+        }
+        if (content.size() > FSConstants.FOLDER_CONTENT_MAX_SIZE) {
+            throw new FSEntrySizeException("Directory content exceeds max size: " + FSConstants.FOLDER_CONTENT_MAX_SIZE);
+        }
+        for (FSEntry entry : content) {
+            entry.validateEntrySize();
         }
     }
 }

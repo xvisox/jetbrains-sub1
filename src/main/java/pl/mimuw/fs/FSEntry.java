@@ -1,6 +1,7 @@
 package pl.mimuw.fs;
 
 import lombok.extern.slf4j.Slf4j;
+import pl.mimuw.fs.exceptions.FSEntrySizeException;
 import pl.mimuw.fs.exceptions.FSEntryNotCreatedException;
 import pl.mimuw.fs.exceptions.FSNoSuchDirectoryException;
 
@@ -17,6 +18,8 @@ public abstract class FSEntry {
     }
 
     public abstract void createEntryInFS(final String destination) throws FSEntryNotCreatedException;
+
+    public abstract void validateEntrySize() throws FSEntrySizeException;
 
     protected void throwIfDirectoryDoesNotExist(final String pathToDirectory) {
         final Path path = Paths.get(pathToDirectory);

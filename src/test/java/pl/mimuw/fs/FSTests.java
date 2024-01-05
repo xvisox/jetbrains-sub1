@@ -1,10 +1,10 @@
 package pl.mimuw.fs;
 
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import pl.mimuw.fs.exceptions.FSEntryNotCreatedException;
+import pl.mimuw.fs.exceptions.FSEntrySizeException;
 import pl.mimuw.fs.exceptions.FSNoSuchDirectoryException;
 
 import java.nio.file.Path;
@@ -167,6 +167,64 @@ public class FSTests {
         // when & then
         final String path = tempDir.toString() + "/nonexistent";
         Assertions.assertThrows(FSNoSuchDirectoryException.class, () -> FSCreator.create(folder, path));
+    }
+
+    @Test
+    void createTheBiggestPossibleFolderPerformanceTest(@TempDir Path tempDir) {
+        // given
+        final List<FSEntry> fileEntries = FSTestsUtils.createListOfUniqueFiles(FSConstants.FOLDER_CONTENT_MAX_SIZE, FSConstants.FILE_CONTENT_MAX_SIZE);
+        final FSFolder folder = new FSFolder(TEST_FOLDER_NAME, fileEntries);
+
+        // when
+        final String path = tempDir.toString();
+        final long timeElapsed = FSTestsUtils.measureTime(() -> FSCreator.create(folder, path));
+
+        // then
+        Assertions.assertTrue(timeElapsed < 1500L);
+    }
+
+    @Test
+    void createFolderWithTooMuchEntriesExceptionTest() {
+        // given
+        final List<FSEntry> fileEntries = FSTestsUtils.createListOfUniqueFiles(FSConstants.FOLDER_CONTENT_MAX_SIZE + 1, 1);
+        final FSFolder folder = new FSFolder(TEST_FOLDER_NAME, fileEntries);
+
+        // when & then
+        final String path = "/some/path";
+        Assertions.assertThrows(FSEntrySizeException.class, () -> FSCreator.create(folder, path));
+    }
+
+    @Test
+    void createFileWithTooMuchContentExceptionTest() {
+        // given
+        final String fileContent = FSTestsUtils.createStringOfLength(FSConstants.FILE_CONTENT_MAX_SIZE + 1);
+        final FSFile file = new FSFile(TEST_FILE_NAME, fileContent);
+
+        // when & then
+        final String path = "/some/path";
+        Assertions.assertThrows(FSEntrySizeException.class, () -> FSCreator.create(file, path));
+    }
+
+    @Test
+    void createFileWithTooLongNameExceptionTest() {
+        // given
+        final String fileName = FSTestsUtils.createStringOfLength(FSConstants.FILE_NAME_MAX_LENGTH + 1);
+        final FSFile file = new FSFile(fileName, TEST_FILE_CONTENT);
+
+        // when & then
+        final String path = "/some/path";
+        Assertions.assertThrows(FSEntrySizeException.class, () -> FSCreator.create(file, path));
+    }
+
+    @Test
+    void createFolderWithTooLongNameExceptionTest() {
+        // given
+        final String folderName = FSTestsUtils.createStringOfLength(FSConstants.FOLDER_NAME_MAX_LENGTH + 1);
+        final FSFolder folder = new FSFolder(folderName, List.of());
+
+        // when & then
+        final String path = "/some/path";
+        Assertions.assertThrows(FSEntrySizeException.class, () -> FSCreator.create(folder, path));
     }
 
     @Test
