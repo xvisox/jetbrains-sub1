@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Assertions;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FSTestsUtils {
 
@@ -39,5 +41,15 @@ public class FSTestsUtils {
         } catch (Exception e) {
             Assertions.fail("Error while reading directory: " + pathToDirectory.toString());
         }
+    }
+
+    public static FSFolder createFolderWithCycleOfLength(final int length) {
+        List<FSEntry> entries = new ArrayList<>();
+        FSFolder folder = new FSFolder("dir0", entries);
+        for (int i = 0; i < length - 1; i++) {
+            entries.add(new FSFolder("dir" + (i + 1), entries = new ArrayList<>()));
+        }
+        entries.add(folder);
+        return folder;
     }
 }

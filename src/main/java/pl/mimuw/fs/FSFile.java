@@ -6,6 +6,7 @@ import pl.mimuw.fs.exceptions.FSEntryNotCreatedException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.Set;
 
 @Slf4j
 public class FSFile extends FSEntry {
@@ -30,5 +31,10 @@ public class FSFile extends FSEntry {
     public void createEntryInFS(final String destination) throws FSEntryNotCreatedException {
         throwIfDirectoryDoesNotExist(destination);
         createFile(destination + "/" + name, content);
+    }
+
+    @Override
+    public void checkForCycle(final Set<FSEntry> visited) {
+        // OK - no cycles in files
     }
 }
