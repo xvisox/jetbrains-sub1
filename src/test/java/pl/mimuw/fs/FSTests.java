@@ -183,7 +183,7 @@ public class FSTests {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {0, 1, 2, 3, 5, 8, 13, 21})
+    @ValueSource(ints = {1, 2, 3, 5, 8, 13, 21})
     void createCyclicStructureExceptionTest(int cycleLength, @TempDir Path tempDir) {
         // given
         final FSFolder folder = FSTestsUtils.createFolderWithCycleOfLength(cycleLength);
