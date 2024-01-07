@@ -4,6 +4,9 @@ package pl.mimuw.fs;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import pl.mimuw.fs.exceptions.FSCyclicStructureException;
 import pl.mimuw.fs.exceptions.FSEntryNotCreatedException;
 import pl.mimuw.fs.exceptions.FSNoSuchDirectoryException;
 
@@ -177,5 +180,30 @@ public class FSTests {
         // when & then
         final String path = "/root";
         Assertions.assertThrows(FSEntryNotCreatedException.class, () -> FSCreator.create(file, path));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {1, 2, 3, 5, 8, 13, 21})
+    void createCyclicStructureExceptionTest(int cycleLength, @TempDir Path tempDir) {
+        // given
+        final FSFolder folder = FSTestsUtils.createFolderWithCycleOfLength(cycleLength);
+
+        // when & then
+        final String path = tempDir.toString();
+        Assertions.assertThrows(FSCyclicStructureException.class, () -> FSCreator.create(folder, path));
+    }
+
+    @Test
+    void createMoreComplexCyclicStructureExceptionTest(@TempDir Path tempDir) {
+        // given
+        final FSFile file = new FSFile(TEST_FILE_NAME, TEST_FILE_CONTENT);
+        final FSFolder folder = FSTestsUtils.createFolderWithCycleOfLength(5);
+        final FSFolder folder1 = new FSFolder(TEST_FOLDER_NAME, List.of(file, file));
+        final FSFolder folder2 = new FSFolder(TEST_FOLDER_NAME, List.of(folder1, file));
+        final FSFolder folder3 = new FSFolder(TEST_FOLDER_NAME, List.of(folder1, folder2, folder));
+
+        // when & then
+        final String path = tempDir.toString();
+        Assertions.assertThrows(FSCyclicStructureException.class, () -> FSCreator.create(folder3, path));
     }
 }
